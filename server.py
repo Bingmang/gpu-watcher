@@ -1,6 +1,13 @@
 import json
 import time
+import yaml
+import os
 from flask import Flask, request, render_template, send_file
+
+
+with open(os.path.join(os.path.split(__file__)[0], 'config.yaml')) as f:
+    config = yaml.load(f)
+
 app = Flask(__name__)
 
 act_map = {}
@@ -27,4 +34,4 @@ def ping():
     return str(body)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=int(config['lab']['center']['port']))
