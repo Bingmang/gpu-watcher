@@ -23,24 +23,31 @@ def get_gpu_info():
     gpu_info = {}
     for i in range(len(handle_list)):
         meminfo = pynvml.nvmlDeviceGetMemoryInfo(handle_list[i])
-        gpu_info[i] = '{:.1f}M/{:.1f}M ({}%)'.format(meminfo.used / 2**20,
-                                                     meminfo.total / 2**20, round(meminfo.used / meminfo.total * 100))
+        gpu_info[i] = {
+            'status': '{:.1f}M/{:.1f}M'.format(meminfo.used / 2**20, meminfo.total / 2**20),
+            'percentage': round(meminfo.used / meminfo.total * 100)
+        }
     return gpu_info
 
 
 if __name__ == "__main__":
-    ip = get_host_ip()
-    body = {'ip': ip, 'host': HOST, 'gpu_nums': GPU_NUMS,
-            'gpu_info': {}, '_date': time.time()}
+    body = {
+        'ip': None, 
+        'host': HOST, 
+        'gpu_nums': GPU_NUMS,
+        'gpu_info': {}, 
+        '_date': None}
     error_count = 0
     while True:
-        body['_date'] = int(time.time())
+        body['ip'] = get_host_ip()
         body['gpu_info'] = get_gpu_info()
+        body['_date'] = time.strftime('%Y-%m-%d %H:%M:%S')
         success = False
         try:
             res = requests.post(target, json.dumps(body))
             if res.status_code == 200:
                 success = True
+                print('Success ping')
         except Exception:
             pass
         if not success:

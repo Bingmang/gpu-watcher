@@ -1,28 +1,109 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <!-- import CSS -->
   <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
 </head>
+
 <body>
   <div id="app">
-    <el-button @click="visible = true">Button</el-button>
-    <el-dialog :visible.sync="visible" title="Hello world">
-      <p>Try Element</p>
-    </el-dialog>
+    <el-row>
+      <el-col :span="8" v-for="(info, host) of gpu_data">
+        <el-card class="gpu_card">
+          <div class="gpu_infos">
+            <h2>{{ info.host }}</h2>
+            <p>{{ info.ip }}</p>
+            <p class="time">{{ info._date }}</p>
+          </div>
+          <div v-for="(gpu, gpu_index) of info.gpu_info" class="gpu_info">
+            <el-progress :percentage="gpu.percentage" status="text">cuda:{{ gpu_index }} - {{ gpu.status }}</el-progress>
+          </div>
+          <el-button class="bottom" type="primary" plain href="info.ip">
+            <a :href="'http://' + info.ip + ':8888'">Enter Jupyter</a>
+          </el-button>
+        </el-card>
+      </el-col>
+    </el-row>
+
+
+
   </div>
 </body>
-  <!-- import Vue before Element -->
-  <script src="https://unpkg.com/vue/dist/vue.js"></script>
-  <!-- import JavaScript -->
-  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-  <script>
-    new Vue({
-      el: '#app',
-      data: function() {
-        return { visible: false }
+<!-- import Vue before Element -->
+<style>
+  body {
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  }
+
+  a {
+    text-decoration: none
+  }
+
+  .time {
+    font-size: 13px;
+    color: #999;
+  }
+
+  .gpu_card {
+    margin: 15px;
+    text-align: center;
+  }
+
+  .gpu_info {
+    margin: 15px;
+  }
+
+  .bottom {
+    margin-top: 13px;
+    line-height: 12px;
+  }
+
+  .button {
+    padding: 0;
+    float: right;
+  }
+
+  .image {
+    width: 100%;
+    display: block;
+  }
+
+  .clearfix:before,
+  .clearfix:after {
+    display: table;
+    content: "";
+  }
+
+  .clearfix:after {
+    clear: both
+  }
+</style>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      gpu_data: {}
+    },
+    methods: {
+      getActMap: function () {
+        let url = 'api/gpu'
+        $.get(url, res => {
+          this.gpu_data = Object.assign({}, this.gpu_data, JSON.parse(res))
+        }
+        )
       }
-    })
-  </script>
+    },
+    mounted() {
+      this.getActMap()
+      setInterval(this.getActMap, 2000)
+    }
+  })
+</script>
+
 </html>
