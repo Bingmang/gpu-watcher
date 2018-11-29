@@ -26,7 +26,7 @@ def ping():
     body = 0
     if request.method == 'POST':
         data = request.get_data()
-        data = json.loads(data)
+        data = json.loads(data.decode())
         if not data.get('ip'):
             body = 1
         else:
