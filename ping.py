@@ -2,14 +2,18 @@ import requests
 import json
 import socket
 import time
+import os
+import yaml
 import pynvml
 
-HOST = 'G1_4GTX1080Ti'
-GPU_NUMS = 1
-target = 'http://localhost:5000/api/ping'
+with open(os.path.split(__file__)[0] + '/config.yaml') as f:
+    config = yaml.load(f)
 
 pynvml.nvmlInit()
-handle_list = [pynvml.nvmlDeviceGetHandleByIndex(i) for i in range(GPU_NUMS)]
+host = config['local']['host']
+target = config['lab']['center_ip']
+gpu_nums = pynvml.nvmlDeviceGetCount()
+handle_list = [pynvml.nvmlDeviceGetHandleByIndex(i) for i in range(gpu_nums)]
 
 
 def get_host_ip():
@@ -33,8 +37,8 @@ def get_gpu_info():
 if __name__ == "__main__":
     body = {
         'ip': None, 
-        'host': HOST, 
-        'gpu_nums': GPU_NUMS,
+        'host': host, 
+        'gpu_nums': gpu_nums,
         'gpu_info': {}, 
         '_date': None}
     error_count = 0
