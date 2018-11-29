@@ -5,8 +5,8 @@ import time
 import pynvml
 
 HOST = 'G1_4GTX1080Ti'
-GPU_NUMS = 4
-target = 'http://localhost:5000/ping'
+GPU_NUMS = 1
+target = 'http://localhost:5000/api/ping'
 
 pynvml.nvmlInit()
 handle_list = [pynvml.nvmlDeviceGetHandleByIndex(i) for i in range(GPU_NUMS)]
@@ -36,12 +36,19 @@ if __name__ == "__main__":
     while True:
         body['_date'] = int(time.time())
         body['gpu_info'] = get_gpu_info()
-        res = requests.post(target, json.dumps(body))
-        if res.status_code != 200:
+        success = False
+        try:
+            res = requests.post(target, json.dumps(body))
+            if res.status_code == 200:
+                success = True
+        except Exception:
+            pass
+        if not success:
             error_count += 1
-            print(res.text, res.status_code)
             if error_count > 3:
-                break
+                print('Failed to connect 3 times, try again in 5 minutes...')
+                time.sleep(3 * 60)
+                continue
         else:
             error_count = 0
         time.sleep(10)

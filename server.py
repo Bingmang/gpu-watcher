@@ -1,15 +1,20 @@
 import json
 import time
-from flask import Flask, request
+from flask import Flask, request, render_template
 app = Flask(__name__)
 
 act_map = {}
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+
+@app.route('/api/gpu', methods=['GET'])
+def gpu():
     return json.dumps(act_map)
 
-@app.route('/ping', methods=['GET', 'POST'])
+@app.route('/api/ping', methods=['GET', 'POST'])
 def ping():
     body = 0
     if request.method == 'POST':
